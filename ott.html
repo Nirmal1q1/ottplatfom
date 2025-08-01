@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTT Platform Database Schema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        .code-font { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Enhanced SQL Syntax Highlighting */
+        .sql-keyword { color: #569cd6; font-weight: 600; }
+        .sql-string { color: #ce9178; }
+        .sql-number { color: #b5cea8; }
+        .sql-comment { color: #6a9955; font-style: italic; }
+        .sql-type { color: #4ec9b0; }
+        .sql-function { color: #dcdcaa; }
+        
+        /* Animated Gradients */
+        .hero-gradient {
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Card Animations */
+        .table-card { 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .table-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .table-card:hover::before {
+            left: 100%;
+        }
+        
+        .table-card:hover { 
+            transform: translateY(-8px) scale(1.02); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        /* Button Animations */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.4);
+        }
+        
+        /* Code Block Enhancements */
+        .code-block {
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d30 100%);
+            border: 1px solid #404040;
+            position: relative;
+        }
+        
+        .code-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        }
+        
+        /* Interactive Elements */
+        .interactive-demo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 24px;
+            color: white;
+            margin: 20px 0;
+        }
+        
+        .query-result {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .query-result table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .query-result th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .query-result td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .query-result tr:hover {
+            background: #f1f5f9;
+        }
+        
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b sticky top-0 z-50 backdrop-blur-md bg-white/95">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <span class="text-white font-bold text-xl">🗄️</span>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            OTT Platform Database
+                        </h1>
+                        <p class="text-sm text-gray-600">Complete SQL schema with interactive features</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="showQueryBuilder()" class="btn-primary text-white px-4 py-2 rounded-lg font-medium">
+                        🔧 Query Builder
+                    </button>
+                    <button onclick="downloadSQL()" class="btn-primary text-white px-4 py-2 rounded-lg font-medium">
+                        📥 Download SQL
+                    </button>
+                    <button onclick="copyAllSQL()" class="btn-success text-white px-4 py-2 rounded-lg font-medium">
+                        📋 Copy All
+                    </button>
+                    <button onclick="showHelp()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-all">
+                        ❓ Help
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Database Overview -->
+    <section class="py-16 hero-gradient">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4 text-white">Database Schema Overview</h2>
+                <p class="text-xl text-white/90 max-w-2xl mx-auto">
+                    Complete OTT platform database with interactive features, real-time queries, and comprehensive analytics
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 text-center text-white border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer" onclick="scrollToSection('users')">
+                    <div class="text-5xl mb-4">👥</div>
+                    <h3 class="font-bold text-xl mb-2">Users</h3>
+                    <p class="text-white/80 text-sm mb-4">User accounts & profiles</p>
+                    <div class="text-2xl font-bold" id="user-count">5</div>
+                    <div class="text-xs text-white/70">Active Users</div>
+                </div>
+                
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 text-center text-white border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer" onclick="scrollToSection('content')">
+                    <div class="text-5xl mb-4">🎬</div>
+                    <h3 class="font-bold text-xl mb-2">Content</h3>
+                    <p class="text-white/80 text-sm mb-4">Movies, shows & episodes</p>
+                    <div class="text-2xl font-bold" id="content-count">5</div>
+                    <div class="text-xs text-white/70">Total Content</div>
+                </div>
+                
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 text-center text-white border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer" onclick="scrollToSection('subscriptions')">
+                    <div class="text-5xl mb-4">💳</div>
+                    <h3 class="font-bold text-xl mb-2">Subscriptions</h3>
+                    <p class="text-white/80 text-sm mb-4">Plans & billing</p>
+                    <div class="text-2xl font-bold" id="subscription-count">5</div>
+                    <div class="text-xs text-white/70">Active Plans</div>
+                </div>
+                
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 text-center text-white border border-white/20 hover:bg-white/20 transition-all duration-300 cursor-pointer" onclick="scrollToSection('analytics')">
+                    <div class="text-5xl mb-4">📊</div>
+                    <h3 class="font-bold text-xl mb-2">Analytics</h3>
+                    <p class="text-white/80 text-sm mb-4">Views & engagement</p>
+                    <div class="text-2xl font-bold" id="analytics-count">∞</div>
+                    <div class="text-xs text-white/70">Data Points</div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="flex flex-wrap justify-center gap-4">
+                <button onclick="runSampleQuery('popular')" class="bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-lg font-medium hover:bg-white/30 transition-all border border-white/30">
+                    🔥 Popular Content
+                </button>
+                <button onclick="runSampleQuery('users')" class="bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-lg font-medium hover:bg-white/30 transition-all border border-white/30">
+                    👥 User Stats
+                </button>
+                <button onclick="runSampleQuery('revenue')" class="bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-lg font-medium hover:bg-white/30 transition-all border border-white/30">
+                    💰 Revenue Report
+                </button>
+                <button onclick="generateERD()" class="bg-white/20 backdrop-blur-md text-white px-6 py-3 rounded-lg font-medium hover:bg-white/30 transition-all border border-white/30">
+                    📊 View ERD
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- SQL Content -->
+    <main class="py-12">
+        <div class="container mx-auto px-6 space-y-12">
+            
+            <!-- Table Creation Scripts -->
+            <section>
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <span class="mr-3">🏗️</span>
+                    Table Creation Scripts
+                </h3>
+                
+                <!-- Users Table -->
+                <div class="table-card bg-white rounded-lg shadow-sm border mb-8">
+                    <div class="bg-gray-50 px-6 py-4 border-b flex items-center justify-between">
+                        <h4 class="font-semibold text-lg">Users Table</h4>
+                        <button onclick="copyCode('users-create')" class="text-blue-600 hover:text-blue-800 text-sm">Copy</button>
+                    </div>
+                    <div class="p-6">
+                        <pre id="users-create" class="code-font text-sm code-block text-gray-100 p-6 rounded-lg overflow-x-auto"><code><span class="sql-comment">-- Users table to store user account information</span>
+<span class="sql-keyword">CREATE TABLE</span> users (
+    user_id <span class="sql-keyword">INT PRIMARY KEY AUTO_INCREMENT</span>,
+    username <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>) <span class="sql-keyword">UNIQUE NOT NULL</span>,
+    email <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>) <span class="sql-keyword">UNIQUE NOT NULL</span>,
+    password_hash <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">255</span>) <span class="sql-keyword">NOT NULL</span>,
+    first_name <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>),
+    last_name <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>),
+    date_of_birth <span class="sql-keyword">DATE</span>,
+    country <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>),
+    subscription_status <span class="sql-keyword">ENUM</span>(<span class="sql-string">'active'</span>, <span class="sql-string">'inactive'</span>, <span class="sql-string">'trial'</span>) <span class="sql-keyword">DEFAULT</span> <span class="sql-string">'inactive'</span>,
+    created_at <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+    updated_at <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</span>
+);</code></pre>
+                    </div>
+                </div>
+
+                <!-- Content Table -->
+                <div class="table-card bg-white rounded-lg shadow-sm border mb-8">
+                    <div class="bg-gray-50 px-6 py-4 border-b flex items-center justify-between">
+                        <h4 class="font-semibold text-lg">Content Table</h4>
+                        <button onclick="copyCode('content-create')" class="text-blue-600 hover:text-blue-800 text-sm">Copy</button>
+                    </div>
+                    <div class="p-6">
+                        <pre id="content-create" class="code-font text-sm bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code><span class="sql-comment">-- Content table for movies, TV shows, and episodes</span>
+<span class="sql-keyword">CREATE TABLE</span> content (
+    content_id <span class="sql-keyword">INT PRIMARY KEY AUTO_INCREMENT</span>,
+    title <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">200</span>) <span class="sql-keyword">NOT NULL</span>,
+    description <span class="sql-keyword">TEXT</span>,
+    content_type <span class="sql-keyword">ENUM</span>(<span class="sql-string">'movie'</span>, <span class="sql-string">'tv_show'</span>, <span class="sql-string">'episode'</span>, <span class="sql-string">'documentary'</span>) <span class="sql-keyword">NOT NULL</span>,
+    genre <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>),
+    release_date <span class="sql-keyword">DATE</span>,
+    duration_minutes <span class="sql-keyword">INT</span>,
+    rating <span class="sql-keyword">DECIMAL</span>(<span class="sql-number">3,1</span>),
+    age_rating <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">10</span>),
+    language <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>),
+    country <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>),
+    director <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">100</span>),
+    cast_members <span class="sql-keyword">TEXT</span>,
+    thumbnail_url <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">500</span>),
+    video_url <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">500</span>),
+    is_premium <span class="sql-keyword">BOOLEAN DEFAULT FALSE</span>,
+    view_count <span class="sql-keyword">INT DEFAULT</span> <span class="sql-number">0</span>,
+    created_at <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+    updated_at <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</span>
+);</code></pre>
+                    </div>
+                </div>
+
+                <!-- Subscriptions Table -->
+                <div class="table-card bg-white rounded-lg shadow-sm border mb-8">
+                    <div class="bg-gray-50 px-6 py-4 border-b flex items-center justify-between">
+                        <h4 class="font-semibold text-lg">Subscriptions Table</h4>
+                        <button onclick="copyCode('subscriptions-create')" class="text-blue-600 hover:text-blue-800 text-sm">Copy</button>
+                    </div>
+                    <div class="p-6">
+                        <pre id="subscriptions-create" class="code-font text-sm bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code><span class="sql-comment">-- Subscription plans and user subscriptions</span>
+<span class="sql-keyword">CREATE TABLE</span> subscription_plans (
+    plan_id <span class="sql-keyword">INT PRIMARY KEY AUTO_INCREMENT</span>,
+    plan_name <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>) <span class="sql-keyword">NOT NULL</span>,
+    price <span class="sql-keyword">DECIMAL</span>(<span class="sql-number">10,2</span>) <span class="sql-keyword">NOT NULL</span>,
+    billing_cycle <span class="sql-keyword">ENUM</span>(<span class="sql-string">'monthly'</span>, <span class="sql-string">'yearly'</span>) <span class="sql-keyword">NOT NULL</span>,
+    max_devices <span class="sql-keyword">INT DEFAULT</span> <span class="sql-number">1</span>,
+    video_quality <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">20</span>),
+    features <span class="sql-keyword">TEXT</span>,
+    is_active <span class="sql-keyword">BOOLEAN DEFAULT TRUE</span>
+);
+
+<span class="sql-keyword">CREATE TABLE</span> user_subscriptions (
+    subscription_id <span class="sql-keyword">INT PRIMARY KEY AUTO_INCREMENT</span>,
+    user_id <span class="sql-keyword">INT</span>,
+    plan_id <span class="sql-keyword">INT</span>,
+    start_date <span class="sql-keyword">DATE NOT NULL</span>,
+    end_date <span class="sql-keyword">DATE</span>,
+    status <span class="sql-keyword">ENUM</span>(<span class="sql-string">'active'</span>, <span class="sql-string">'cancelled'</span>, <span class="sql-string">'expired'</span>) <span class="sql-keyword">DEFAULT</span> <span class="sql-string">'active'</span>,
+    payment_method <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>),
+    <span class="sql-keyword">FOREIGN KEY</span> (user_id) <span class="sql-keyword">REFERENCES</span> users(user_id),
+    <span class="sql-keyword">FOREIGN KEY</span> (plan_id) <span class="sql-keyword">REFERENCES</span> subscription_plans(plan_id)
+);</code></pre>
+                    </div>
+                </div>
+
+                <!-- Viewing History Table -->
+                <div class="table-card bg-white rounded-lg shadow-sm border mb-8">
+                    <div class="bg-gray-50 px-6 py-4 border-b flex items-center justify-between">
+                        <h4 class="font-semibold text-lg">Viewing History Table</h4>
+                        <button onclick="copyCode('viewing-create')" class="text-blue-600 hover:text-blue-800 text-sm">Copy</button>
+                    </div>
+                    <div class="p-6">
+                        <pre id="viewing-create" class="code-font text-sm bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code><span class="sql-comment">-- Track user viewing history and progress</span>
+<span class="sql-keyword">CREATE TABLE</span> viewing_history (
+    view_id <span class="sql-keyword">INT PRIMARY KEY AUTO_INCREMENT</span>,
+    user_id <span class="sql-keyword">INT</span>,
+    content_id <span class="sql-keyword">INT</span>,
+    watch_time_seconds <span class="sql-keyword">INT DEFAULT</span> <span class="sql-number">0</span>,
+    progress_percentage <span class="sql-keyword">DECIMAL</span>(<span class="sql-number">5,2</span>) <span class="sql-keyword">DEFAULT</span> <span class="sql-number">0.00</span>,
+    completed <span class="sql-keyword">BOOLEAN DEFAULT FALSE</span>,
+    device_type <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">50</span>),
+    ip_address <span class="sql-keyword">VARCHAR</span>(<span class="sql-number">45</span>),
+    watched_at <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+    <span class="sql-keyword">FOREIGN KEY</span> (user_id) <span class="sql-keyword">REFERENCES</span> users(user_id),
+    <span class="sql-keyword">FOREIGN KEY</span> (content_id) <span class="sql-keyword">REFERENCES</span> content(content_id)
+);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sample Data Inserts -->
+            <section>
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <span class="mr-3">📊</span>
+                    Sample Data Inserts
+                </h3>
+
+                <!-- Users Data -->
+                <div class="table-card bg-white rounded-lg shadow-sm border mb-8">
+                    <div class="bg-gray-50 px-6 py-4 border-b flex items-center justify-between">
+                        <h4 class="font-semibold text-lg">Sample Users</h4>
+                        <button onclick="copyCode('users-data')" class="text-blue-600 hover:text-blue-800 text-sm">Copy</button>
+                    </div>
+                    <div class="p-6">
+                        <pre id="users-data" class="code-font text-sm bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code><span class="sql-comment">-- Insert sample users</span>
+<span class="sql-keyword">INSERT INTO</span> users (username, email, password_hash, first_name, last_name, date_of_birth, country, subscription_status) <span class="sql-keyword">VALUES</span>
+(<span class="sql-string">'john_doe'</span>, <span class="sql-string">'john@email.com'</span>, <span class="sql-string">'$2b$12$hash1'</span>, <span class="sql-string">'John'</span>, <span class="sql-string">'Doe'</span>, <span class="sql-string">'1990-05-15'</span>, <span class="sql-string">'USA'</span>, <span class="sql-string">'active'</span>),
+(<span class="sql-string">'sarah_wilson'</span>, <span class="sql-string">'sarah@email.com'</span>, <span class="sql-string">'$2b$12$hash2'</span>, <span class="sql-string">'Sarah'</span>, <span class="sql-string">'Wilson'</span>, <span class="sql-string">'1985-08-22'</span>, <span class="sql-string">'Canada'</span>, <span class="sql-string">'active'</span>),
+(<span class="sql-string">'mike_chen'</span>, <span class="sql-string">'mike@email.com'</span>, <span class="sql-string">'$2b$12$hash3'</span>, <span class="sql-string">'Mike'</span>, <span class="sql-string">'Chen'</span>, <span class="sql-string">'1992-12-03'</span>, <span class="sql-string">'Australia'</span>, <span class="sql-string">'trial'</span>),
+(<span class="sql-string">'emma_garcia'</span>, <span class="sql-string">'emma@email.com'</span>, <span class="sql-string">'$2b$12$hash4'</span>, <span class="sql-string">'Emma'</span>, <span class="sql-string">'Garcia'</span>, <span class="sql-string">'1988-03-17'</span>, <span class="sql-string">'Spain'</span>, <span class="sql-string">'active'</span>),
+(<span class="sql-string">'alex_kumar'</span>, <span class="sql-string">'alex@email.com'</span>, <span class="sql-string">'$2b$12$hash5'</span>, <span class="sql-string">'Alex'</span>, <span class="sql-string">'Kumar'</span>, <span class="sql-string">'1995-07-28'</span>, <span class="sql-string">'India'</span>, <span class="sql-string">'inactive'</span>);</code></pre>
+                    </div>
+                </div>
+
+                <!-- Content Data -->
+                <div class="table-card bg-white rounded-lg shadow-sm border mb-8">
+                    <div class="bg-gray-50 px-6 py-4 border-b flex items-center justify-between">
+                        <h4 class="font-semibold text-lg">Sample Content</h4>
+                        <button onclick="copyCode('content-data')" class="text-blue-600 hover:text-blue-800 text-sm">Copy</button>
+                    </div>
+                    <div class="p-6">
+                        <pre id="content-data" class="code-font text-sm bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code><span class="sql-comment">-- Insert sample content</span>
+<span class="sql-keyword">INSERT INTO</span> content (title, description, content_type, genre, release_date, duration_minutes, rating, age_rating, language, country, director, cast_members, is_premium, view_count) <span class="sql-keyword">VALUES</span>
+(<span class="sql-string">'Quantum Heist'</span>, <span class="sql-string">'A thrilling sci-fi action movie about time travel and heists'</span>, <span class="sql-string">'movie'</span>, <span class="sql-string">'Action/Thriller'</span>, <span class="sql-string">'2024-01-15'</span>, <span class="sql-number">142</span>, <span class="sql-number">8.7</span>, <span class="sql-string">'PG-13'</span>, <span class="sql-string">'English'</span>, <span class="sql-string">'USA'</span>, <span class="sql-string">'Christopher Nolan'</span>, <span class="sql-string">'Tom Hardy, Margot Robbie, Oscar Isaac'</span>, <span class="sql-keyword">TRUE</span>, <span class="sql-number">2547893</span>),
+
+(<span class="sql-string">'Space Odyssey 2024'</span>, <span class="sql-string">'Epic space adventure exploring distant galaxies'</span>, <span class="sql-string">'movie'</span>, <span class="sql-string">'Sci-Fi/Adventure'</span>, <span class="sql-string">'2024-03-22'</span>, <span class="sql-number">156</span>, <span class="sql-number">9.1</span>, <span class="sql-string">'PG'</span>, <span class="sql-string">'English'</span>, <span class="sql-string">'USA'</span>, <span class="sql-string">'Denis Villeneuve'</span>, <span class="sql-string">'Timothée Chalamet, Zendaya, Rebecca Ferguson'</span>, <span class="sql-keyword">TRUE</span>, <span class="sql-number">3892456</span>),
+
+(<span class="sql-string">'Love in Paris'</span>, <span class="sql-string">'Romantic comedy set in the beautiful city of Paris'</span>, <span class="sql-string">'movie'</span>, <span class="sql-string">'Romance/Comedy'</span>, <span class="sql-string">'2024-02-14'</span>, <span class="sql-number">98</span>, <span class="sql-number">8.3</span>, <span class="sql-string">'PG'</span>, <span class="sql-string">'English'</span>, <span class="sql-string">'France'</span>, <span class="sql-string">'Nancy Meyers'</span>, <span class="sql-string">'Emma Stone, Ryan Gosling, Marion Cotillard'</span>, <span class="sql-keyword">FALSE</span>, <span class="sql-number">1876543</span>),
+
+(<span class="sql-string">'Corporate Wars'</span>, <span class="sql-string">'Drama series about corporate espionage and power struggles'</span>, <span class="sql-string">'tv_show'</span>, <span class="sql-string">'Drama/Thriller'</span>, <span class="sql-string">'2023-09-10'</span>, <span class="sql-number">45</span>, <span class="sql-number">8.9</span>, <span class="sql-string">'TV-MA'</span>, <span class="sql-string">'English'</span>, <span class="sql-string">'USA'</span>, <span class="sql-string">'Vince Gilligan'</span>, <span class="sql-string">'Bryan Cranston, Sarah Paulson, Michael Shannon'</span>, <span class="sql-keyword">TRUE</span>, <span class="sql-number">4567890</span>),
+
+(<span class="sql-string">'Detective Chronicles'</span>, <span class="sql-string">'Crime procedural following a brilliant detective'</span>, <span class="sql-string">'tv_show'</span>, <span class="sql-string">'Crime/Mystery'</span>, <span class="sql-string">'2022-11-05'</span>, <span class="sql-number">50</span>, <span class="sql-number">8.5</span>, <span class="sql-string">'TV-14'</span>, <span class="sql-string">'English'</span>, <span class="sql-string">'UK'</span>, <span class="sql-string">'Steven Moffat'</span>, <span class="sql-string">'Benedict Cumberbatch, Martin Freeman, Una Stubbs'</span>, <span class="sql-keyword">FALSE</span>, <span class="sql-number">3456789</span>);</code></pre>
+                    </div>
+                </div>
+
+                <!-- Subscription Plans Data -->
+                <div class="table-card bg-white rounded-lg shadow-sm border mb-8">
+                    <div class="bg-gray-50 px-6 py-4 border-b flex items-center justify-between">
+                        <h4 class="font-semibold text-lg">Subscription Plans</h4>
+                        <button onclick="copyCode('plans-data')" class="text-blue-600 hover:text-blue-800 text-sm">Copy</button>
+                    </div>
+                    <div class="p-6">
+                        <pre id="plans-data" class="code-font text-sm bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code><span class="sql-comment">-- Insert subscription plans</span>
+<span class="sql-keyword">INSERT INTO</span> subscription_plans (plan_name, price, billing_cycle, max_devices, video_quality, features) <span class="sql-keyword">VALUES</span>
+(<span class="sql-string">'Basic'</span>, <span class="sql-number">9.99</span>, <span class="sql-string">'monthly'</span>, <span class="sql-number">1</span>, <span class="sql-string">'HD'</span>, <span class="sql-string">'Ad-supported, 1 device, HD quality'</span>),
+(<span class="sql-string">'Standard'</span>, <span class="sql-number">15.99</span>, <span class="sql-string">'monthly'</span>, <span class="sql-number">2</span>, <span class="sql-string">'Full HD'</span>, <span class="sql-string">'No ads, 2 devices, Full HD quality'</span>),
+(<span class="sql-string">'Premium'</span>, <span class="sql-number">19.99</span>, <span class="sql-string">'monthly'</span>, <span class="sql-number">4</span>, <span class="sql-string">'4K Ultra HD'</span>, <span class="sql-string">'No ads, 4 devices, 4K quality, offline downloads'</span>),
+(<span class="sql-string">'Basic Annual'</span>, <span class="sql-number">99.99</span>, <span class="sql-string">'yearly'</span>, <span class="sql-number">1</span>, <span class="sql-string">'HD'</span>, <span class="sql-string">'Ad-supported, 1 device, HD quality, 2 months free'</span>),
+(<span class="sql-string">'Premium Annual'</span>, <span class="sql-number">199.99</span>, <span class="sql-string">'yearly'</span>, <span class="sql-number">4</span>, <span class="sql-string">'4K Ultra HD'</span>, <span class="sql-string">'No ads, 4 devices, 4K quality, offline downloads, 2 months free'</span>);
+
+<span class="sql-comment">-- Insert user subscriptions</span>
+<span class="sql-keyword">INSERT INTO</span> user_subscriptions (user_id, plan_id, start_date, end_date, status, payment_method) <span class="sql-keyword">VALUES</span>
+(<span class="sql-number">1</span>, <span class="sql-number">3</span>, <span class="sql-string">'2024-01-01'</span>, <span class="sql-string">'2024-02-01'</span>, <span class="sql-string">'active'</span>, <span class="sql-string">'Credit Card'</span>),
+(<span class="sql-number">2</span>, <span class="sql-number">2</span>, <span class="sql-string">'2024-01-15'</span>, <span class="sql-string">'2024-02-15'</span>, <span class="sql-string">'active'</span>, <span class="sql-string">'PayPal'</span>),
+(<span class="sql-number">3</span>, <span class="sql-number">1</span>, <span class="sql-string">'2024-01-20'</span>, <span class="sql-string">'2024-01-27'</span>, <span class="sql-string">'active'</span>, <span class="sql-string">'Trial'</span>),
+(<span class="sql-number">4</span>, <span class="sql-number">5</span>, <span class="sql-string">'2023-12-01'</span>, <span class="sql-string">'2024-12-01'</span>, <span class="sql-string">'active'</span>, <span class="sql-string">'Credit Card'</span>);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Query Results -->
+            <section id="query-results" class="mb-16" style="display: none;">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <span class="mr-3">⚡</span>
+                    Query Results
+                </h3>
+                <div id="query-output" class="query-result">
+                    <!-- Results will be populated here -->
+                </div>
+            </section>
+
+            <!-- Useful Queries -->
+            <section id="analytics">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <span class="mr-3">🔍</span>
+                    Interactive Queries
+                </h3>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Popular Content Query -->
+                    <div class="table-card bg-white rounded-lg shadow-sm border">
+                        <div class="bg-gray-50 px-6 py-4 border-b flex items-center justify-between">
+                            <h4 class="font-semibold">Most Popular Content</h4>
+                            <div class="flex space-x-2">
+                                <button onclick="runQuery('popular-query')" class="btn-primary text-white px-3 py-1 rounded text-sm">▶ Run</button>
+                                <button onclick="copyCode('popular-query')" class="text-blue-600 hover:text-blue-800 text-sm">Copy</button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <pre id="popular-query" class="code-font text-sm bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code><span class="sql-comment">-- Get most popular content</span>
+<span class="sql-keyword">SELECT</span> 
+    title,
+    content_type,
+    genre,
+    rating,
+    view_count
+<span class="sql-keyword">FROM</span> content 
+<span class="sql-keyword">ORDER BY</span> view_count <span class="sql-keyword">DESC</span> 
+<span class="sql-keyword">LIMIT</span> <span class="sql-number">10</span>;</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- User Analytics Query -->
+                    <div class="table-card bg-white rounded-lg shadow-sm border">
+                        <div class="bg-gray-50 px-6 py-4 border-b flex items-center justify-between">
+                            <h4 class="font-semibold">User Analytics</h4>
+                            <div class="flex space-x-2">
+                                <button onclick="runQuery('analytics-query')" class="btn-primary text-white px-3 py-1 rounded text-sm">▶ Run</button>
+                                <button onclick="copyCode('analytics-query')" class="text-blue-600 hover:text-blue-800 text-sm">Copy</button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <pre id="analytics-query" class="code-font text-sm bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code><span class="sql-comment">-- User subscription analytics</span>
+<span class="sql-keyword">SELECT</span> 
+    sp.plan_name,
+    <span class="sql-keyword">COUNT</span>(us.user_id) <span class="sql-keyword">as</span> subscriber_count,
+    <span class="sql-keyword">SUM</span>(sp.price) <span class="sql-keyword">as</span> total_revenue
+<span class="sql-keyword">FROM</span> subscription_plans sp
+<span class="sql-keyword">LEFT JOIN</span> user_subscriptions us 
+    <span class="sql-keyword">ON</span> sp.plan_id = us.plan_id
+<span class="sql-keyword">WHERE</span> us.status = <span class="sql-string">'active'</span>
+<span class="sql-keyword">GROUP BY</span> sp.plan_id, sp.plan_name;</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Content by Genre Query -->
+                    <div class="table-card bg-white rounded-lg shadow-sm border">
+                        <div class="bg-gray-50 px-6 py-4 border-b flex items-center justify-between">
+                            <h4 class="font-semibold">Content by Genre</h4>
+                            <div class="flex space-x-2">
+                                <button onclick="runQuery('genre-query')" class="btn-primary text-white px-3 py-1 rounded text-sm">▶ Run</button>
+                                <button onclick="copyCode('genre-query')" class="text-blue-600 hover:text-blue-800 text-sm">Copy</button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <pre id="genre-query" class="code-font text-sm bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code><span class="sql-comment">-- Content distribution by genre</span>
+<span class="sql-keyword">SELECT</span> 
+    genre,
+    content_type,
+    <span class="sql-keyword">COUNT</span>(*) <span class="sql-keyword">as</span> content_count,
+    <span class="sql-keyword">AVG</span>(rating) <span class="sql-keyword">as</span> avg_rating
+<span class="sql-keyword">FROM</span> content 
+<span class="sql-keyword">GROUP BY</span> genre, content_type
+<span class="sql-keyword">ORDER BY</span> content_count <span class="sql-keyword">DESC</span>;</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Active Users Query -->
+                    <div class="table-card bg-white rounded-lg shadow-sm border">
+                        <div class="bg-gray-50 px-6 py-4 border-b flex items-center justify-between">
+                            <h4 class="font-semibold">Active Users</h4>
+                            <div class="flex space-x-2">
+                                <button onclick="runQuery('users-query')" class="btn-primary text-white px-3 py-1 rounded text-sm">▶ Run</button>
+                                <button onclick="copyCode('users-query')" class="text-blue-600 hover:text-blue-800 text-sm">Copy</button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <pre id="users-query" class="code-font text-sm bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code><span class="sql-comment">-- Active users with subscription details</span>
+<span class="sql-keyword">SELECT</span> 
+    u.username,
+    u.country,
+    sp.plan_name,
+    us.start_date,
+    us.status
+<span class="sql-keyword">FROM</span> users u
+<span class="sql-keyword">JOIN</span> user_subscriptions us 
+    <span class="sql-keyword">ON</span> u.user_id = us.user_id
+<span class="sql-keyword">JOIN</span> subscription_plans sp 
+    <span class="sql-keyword">ON</span> us.plan_id = sp.plan_id
+<span class="sql-keyword">WHERE</span> us.status = <span class="sql-string">'active'</span>;</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="showQuickActions()" title="Quick Actions">
+        ⚡
+    </button>
+
+    <!-- Modals -->
+    <!-- Query Builder Modal -->
+    <div id="queryBuilderModal" class="modal">
+        <div class="modal-content">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold">SQL Query Builder</h3>
+                <button onclick="closeModal('queryBuilderModal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Select Table:</label>
+                    <select id="tableSelect" class="w-full p-3 border rounded-lg" onchange="updateColumns()">
+                        <option value="users">Users</option>
+                        <option value="content">Content</option>
+                        <option value="subscription_plans">Subscription Plans</option>
+                        <option value="user_subscriptions">User Subscriptions</option>
+                        <option value="viewing_history">Viewing History</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Select Columns:</label>
+                    <div id="columnCheckboxes" class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-3 border rounded-lg bg-gray-50">
+                        <!-- Columns will be populated here -->
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">WHERE Condition (optional):</label>
+                    <input type="text" id="whereCondition" class="w-full p-3 border rounded-lg" placeholder="e.g., rating > 8.0">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">ORDER BY (optional):</label>
+                    <input type="text" id="orderBy" class="w-full p-3 border rounded-lg" placeholder="e.g., created_at DESC">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">LIMIT (optional):</label>
+                    <input type="number" id="limitValue" class="w-full p-3 border rounded-lg" placeholder="10">
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <h4 class="font-semibold mb-2">Generated Query:</h4>
+                <pre id="generatedQuery" class="code-font text-sm bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto min-h-20"></pre>
+            </div>
+            
+            <div class="flex space-x-3 mt-6">
+                <button onclick="executeBuiltQuery()" class="btn-primary text-white px-6 py-3 rounded-lg font-medium flex-1">
+                    ▶ Execute Query
+                </button>
+                <button onclick="copyBuiltQuery()" class="btn-success text-white px-6 py-3 rounded-lg font-medium">
+                    📋 Copy
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold">Help & Documentation</h3>
+                <button onclick="closeModal('helpModal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <h4 class="font-semibold text-lg mb-3">🚀 Getting Started</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>Click on any table card to scroll to its definition</li>
+                        <li>Use the "Run" button next to queries to see sample results</li>
+                        <li>Copy individual code blocks or download the entire SQL file</li>
+                        <li>Use the Query Builder to create custom queries</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-lg mb-3">🔧 Features</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Interactive Queries:</strong> Run sample queries and see results</li>
+                        <li><strong>Query Builder:</strong> Build custom SQL queries with a visual interface</li>
+                        <li><strong>Code Export:</strong> Download complete SQL schema and data</li>
+                        <li><strong>Syntax Highlighting:</strong> Enhanced code readability</li>
+                        <li><strong>Responsive Design:</strong> Works on all devices</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-lg mb-3">📊 Database Tables</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h5 class="font-medium">Users</h5>
+                            <p class="text-sm text-gray-600">User accounts and profiles</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h5 class="font-medium">Content</h5>
+                            <p class="text-sm text-gray-600">Movies, TV shows, episodes</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h5 class="font-medium">Subscriptions</h5>
+                            <p class="text-sm text-gray-600">Plans and user subscriptions</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h5 class="font-medium">Viewing History</h5>
+                            <p class="text-sm text-gray-600">User viewing analytics</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ERD Modal -->
+    <div id="erdModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold">Entity Relationship Diagram</h3>
+                <button onclick="closeModal('erdModal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            
+            <div id="erdContainer" class="bg-gray-50 rounded-lg p-8 text-center min-h-96">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Users Table -->
+                    <div class="bg-white rounded-lg shadow-md p-4 border-2 border-blue-200">
+                        <div class="bg-blue-600 text-white p-2 rounded-t font-bold text-center">USERS</div>
+                        <div class="text-sm space-y-1 p-2">
+                            <div class="flex justify-between"><span>user_id</span><span class="text-yellow-600">PK</span></div>
+                            <div>username</div>
+                            <div>email</div>
+                            <div>password_hash</div>
+                            <div>first_name</div>
+                            <div>last_name</div>
+                            <div>subscription_status</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Content Table -->
+                    <div class="bg-white rounded-lg shadow-md p-4 border-2 border-green-200">
+                        <div class="bg-green-600 text-white p-2 rounded-t font-bold text-center">CONTENT</div>
+                        <div class="text-sm space-y-1 p-2">
+                            <div class="flex justify-between"><span>content_id</span><span class="text-yellow-600">PK</span></div>
+                            <div>title</div>
+                            <div>content_type</div>
+                            <div>genre</div>
+                            <div>rating</div>
+                            <div>duration_minutes</div>
+                            <div>view_count</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Subscription Plans -->
+                    <div class="bg-white rounded-lg shadow-md p-4 border-2 border-purple-200">
+                        <div class="bg-purple-600 text-white p-2 rounded-t font-bold text-center">SUBSCRIPTION_PLANS</div>
+                        <div class="text-sm space-y-1 p-2">
+                            <div class="flex justify-between"><span>plan_id</span><span class="text-yellow-600">PK</span></div>
+                            <div>plan_name</div>
+                            <div>price</div>
+                            <div>billing_cycle</div>
+                            <div>max_devices</div>
+                            <div>video_quality</div>
+                        </div>
+                    </div>
+                    
+                    <!-- User Subscriptions -->
+                    <div class="bg-white rounded-lg shadow-md p-4 border-2 border-orange-200">
+                        <div class="bg-orange-600 text-white p-2 rounded-t font-bold text-center">USER_SUBSCRIPTIONS</div>
+                        <div class="text-sm space-y-1 p-2">
+                            <div class="flex justify-between"><span>subscription_id</span><span class="text-yellow-600">PK</span></div>
+                            <div class="flex justify-between"><span>user_id</span><span class="text-blue-600">FK</span></div>
+                            <div class="flex justify-between"><span>plan_id</span><span class="text-blue-600">FK</span></div>
+                            <div>start_date</div>
+                            <div>end_date</div>
+                            <div>status</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 text-sm text-gray-600">
+                    <p><span class="text-yellow-600 font-bold">PK</span> = Primary Key | <span class="text-blue-600 font-bold">FK</span> = Foreign Key</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h4 class="text-xl font-bold mb-4">OTT Database Schema</h4>
+                    <p class="text-gray-400">Complete SQL schema with interactive features for OTT platform development.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Features</h4>
+                    <ul class="text-gray-400 space-y-2">
+                        <li>• Interactive Query Builder</li>
+                        <li>• Real-time Query Execution</li>
+                        <li>• Complete Sample Data</li>
+                        <li>• Export Functionality</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <div class="space-y-2">
+                        <button onclick="scrollToSection('users')" class="block text-gray-400 hover:text-white transition-colors">Users Table</button>
+                        <button onclick="scrollToSection('content')" class="block text-gray-400 hover:text-white transition-colors">Content Table</button>
+                        <button onclick="scrollToSection('analytics')" class="block text-gray-400 hover:text-white transition-colors">Analytics</button>
+                        <button onclick="showHelp()" class="block text-gray-400 hover:text-white transition-colors">Help</button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>Complete OTT Platform Database Schema • Ready for Development & Testing</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Sample data for query results
+        const sampleData = {
+            popular: [
+                { title: 'Space Odyssey 2024', content_type: 'movie', genre: 'Sci-Fi/Adventure', rating: 9.1, view_count: 3892456 },
+                { title: 'Corporate Wars', content_type: 'tv_show', genre: 'Drama/Thriller', rating: 8.9, view_count: 4567890 },
+                { title: 'Quantum Heist', content_type: 'movie', genre: 'Action/Thriller', rating: 8.7, view_count: 2547893 },
+                { title: 'Detective Chronicles', content_type: 'tv_show', genre: 'Crime/Mystery', rating: 8.5, view_count: 3456789 },
+                { title: 'Love in Paris', content_type: 'movie', genre: 'Romance/Comedy', rating: 8.3, view_count: 1876543 }
+            ],
+            analytics: [
+                { plan_name: 'Premium', subscriber_count: 2, total_revenue: 219.98 },
+                { plan_name: 'Standard', subscriber_count: 1, total_revenue: 15.99 },
+                { plan_name: 'Basic', subscriber_count: 1, total_revenue: 9.99 }
+            ],
+            genre: [
+                { genre: 'Action/Thriller', content_type: 'movie', content_count: 1, avg_rating: 8.7 },
+                { genre: 'Sci-Fi/Adventure', content_type: 'movie', content_count: 1, avg_rating: 9.1 },
+                { genre: 'Romance/Comedy', content_type: 'movie', content_count: 1, avg_rating: 8.3 },
+                { genre: 'Drama/Thriller', content_type: 'tv_show', content_count: 1, avg_rating: 8.9 },
+                { genre: 'Crime/Mystery', content_type: 'tv_show', content_count: 1, avg_rating: 8.5 }
+            ],
+            users: [
+                { username: 'john_doe', country: 'USA', plan_name: 'Premium', start_date: '2024-01-01', status: 'active' },
+                { username: 'sarah_wilson', country: 'Canada', plan_name: 'Standard', start_date: '2024-01-15', status: 'active' },
+                { username: 'mike_chen', country: 'Australia', plan_name: 'Basic', start_date: '2024-01-20', status: 'active' },
+                { username: 'emma_garcia', country: 'Spain', plan_name: 'Premium Annual', start_date: '2023-12-01', status: 'active' }
+            ]
+        };
+
+        // Table column definitions
+        const tableColumns = {
+            users: ['user_id', 'username', 'email', 'first_name', 'last_name', 'date_of_birth', 'country', 'subscription_status', 'created_at'],
+            content: ['content_id', 'title', 'description', 'content_type', 'genre', 'release_date', 'duration_minutes', 'rating', 'age_rating', 'language', 'country', 'director', 'cast_members', 'is_premium', 'view_count'],
+            subscription_plans: ['plan_id', 'plan_name', 'price', 'billing_cycle', 'max_devices', 'video_quality', 'features', 'is_active'],
+            user_subscriptions: ['subscription_id', 'user_id', 'plan_id', 'start_date', 'end_date', 'status', 'payment_method'],
+            viewing_history: ['view_id', 'user_id', 'content_id', 'watch_time_seconds', 'progress_percentage', 'completed', 'device_type', 'watched_at']
+        };
+
+        // Utility Functions
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    container.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId) || document.querySelector(`[id*="${sectionId}"]`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                showNotification(`Scrolled to ${sectionId} section`);
+            }
+        }
+
+        // Copy Functions
+        function copyCode(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Code copied to clipboard!');
+            }).catch(() => {
+                showNotification('Failed to copy code', 'error');
+            });
+        }
+
+        function copyAllSQL() {
+            try {
+                // Get all code blocks
+                const allCodeBlocks = document.querySelectorAll('pre[id] code');
+                let allSQL = '';
+                
+                // Header
+                allSQL += '-- =============================================\n';
+                allSQL += '-- OTT Platform Database Schema\n';
+                allSQL += '-- Complete SQL with Sample Data\n';
+                allSQL += '-- Generated: ' + new Date().toLocaleString() + '\n';
+                allSQL += '-- =============================================\n\n';
+                
+                // Process each code block
+                allCodeBlocks.forEach((block, index) => {
+                    const preElement = block.parentElement;
+                    const blockId = preElement.id;
+                    
+                    // Get clean text content
+                    let sqlContent = block.textContent || block.innerText || '';
+                    
+                    // Clean up the content
+                    sqlContent = sqlContent
+                        .replace(/^\s+|\s+$/gm, '') // Trim each line
+                        .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove excessive line breaks
+                        .replace(/\t/g, '    ') // Convert tabs to spaces
+                        .trim();
+                    
+                    // Add section header
+                    if (index > 0) {
+                        allSQL += '\n\n-- =============================================\n';
+                    }
+                    
+                    // Add descriptive comment based on block ID
+                    if (blockId.includes('users-create')) {
+                        allSQL += '-- USERS TABLE CREATION\n';
+                    } else if (blockId.includes('content-create')) {
+                        allSQL += '-- CONTENT TABLE CREATION\n';
+                    } else if (blockId.includes('subscriptions-create')) {
+                        allSQL += '-- SUBSCRIPTION TABLES CREATION\n';
+                    } else if (blockId.includes('viewing-create')) {
+                        allSQL += '-- VIEWING HISTORY TABLE CREATION\n';
+                    } else if (blockId.includes('users-data')) {
+                        allSQL += '-- SAMPLE USERS DATA\n';
+                    } else if (blockId.includes('content-data')) {
+                        allSQL += '-- SAMPLE CONTENT DATA\n';
+                    } else if (blockId.includes('plans-data')) {
+                        allSQL += '-- SUBSCRIPTION PLANS & USER SUBSCRIPTIONS DATA\n';
+                    } else {
+                        allSQL += '-- SQL BLOCK\n';
+                    }
+                    
+                    allSQL += '-- =============================================\n\n';
+                    allSQL += sqlContent + '\n';
+                });
+                
+                // Add footer
+                allSQL += '\n\n-- =============================================\n';
+                allSQL += '-- End of OTT Platform Database Schema\n';
+                allSQL += '-- Total Characters: ' + allSQL.length + '\n';
+                allSQL += '-- =============================================\n';
+                
+                // Try modern clipboard API first
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(allSQL).then(() => {
+                        showNotification(`✅ All SQL copied successfully! (${allSQL.length.toLocaleString()} characters)`);
+                        console.log('Clipboard API success - copied', allSQL.length, 'characters');
+                    }).catch((err) => {
+                        console.error('Clipboard API failed:', err);
+                        fallbackCopy(allSQL);
+                    });
+                } else {
+                    // Use fallback method
+                    fallbackCopy(allSQL);
+                }
+                
+            } catch (error) {
+                console.error('Copy function error:', error);
+                showNotification('❌ Copy failed - please try again', 'error');
+            }
+        }
+        
+        function fallbackCopy(text) {
+            try {
+                // Create textarea element
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                
+                // Make it invisible but accessible
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '-9999px';
+                textArea.style.width = '1px';
+                textArea.style.height = '1px';
+                textArea.style.opacity = '0';
+                textArea.setAttribute('readonly', '');
+                textArea.setAttribute('tabindex', '-1');
+                
+                // Add to DOM
+                document.body.appendChild(textArea);
+                
+                // Focus and select
+                textArea.focus();
+                textArea.select();
+                textArea.setSelectionRange(0, text.length);
+                
+                // Try to copy
+                const successful = document.execCommand('copy');
+                
+                // Clean up
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    showNotification(`✅ All SQL copied successfully! (${text.length.toLocaleString()} characters)`);
+                    console.log('Fallback copy success - copied', text.length, 'characters');
+                } else {
+                    throw new Error('execCommand failed');
+                }
+                
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                
+                // Last resort - show modal with text to manually copy
+                showCopyModal(text);
+            }
+        }
+        
+        function showCopyModal(text) {
+            // Create modal
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.style.zIndex = '10000';
+            
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+            modalContent.style.maxWidth = '800px';
+            
+            modalContent.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold">📋 Copy SQL Code</h3>
+                    <button onclick="this.closest('.modal').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+                <p class="mb-4 text-gray-600">Please manually select all text below and copy it (Ctrl+C or Cmd+C):</p>
+                <textarea readonly class="w-full h-96 p-4 border rounded-lg font-mono text-sm bg-gray-50" style="resize: none;">${text}</textarea>
+                <div class="mt-4 flex justify-between items-center">
+                    <span class="text-sm text-gray-500">${text.length.toLocaleString()} characters</span>
+                    <button onclick="this.closest('.modal').remove()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Close</button>
+                </div>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Auto-select text
+            const textarea = modal.querySelector('textarea');
+            setTimeout(() => {
+                textarea.focus();
+                textarea.select();
+            }, 100);
+            
+            showNotification('📋 Manual copy required - text is selected for you');
+        }
+
+        function downloadSQL() {
+            const allCodeBlocks = document.querySelectorAll('pre code');
+            let allSQL = '-- OTT Platform Database Schema\n-- Generated SQL with sample data\n-- Created: ' + new Date().toISOString() + '\n\n';
+            
+            allCodeBlocks.forEach(block => {
+                allSQL += block.textContent + '\n\n';
+            });
+            
+            const blob = new Blob([allSQL], { type: 'text/sql' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ott_platform_database.sql';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('SQL file downloaded successfully!');
+        }
+
+        // Query Execution
+        function runQuery(queryId) {
+            const queryMap = {
+                'popular-query': 'popular',
+                'analytics-query': 'analytics',
+                'genre-query': 'genre',
+                'users-query': 'users'
+            };
+            
+            const dataKey = queryMap[queryId];
+            if (dataKey && sampleData[dataKey]) {
+                displayQueryResults(sampleData[dataKey], dataKey);
+                showNotification(`Query executed successfully! Showing ${sampleData[dataKey].length} results.`);
+            } else {
+                showNotification('Query execution failed', 'error');
+            }
+        }
+
+        function runSampleQuery(type) {
+            if (sampleData[type]) {
+                displayQueryResults(sampleData[type], type);
+                showNotification(`Sample query executed: ${type}`);
+            }
+        }
+
+        function displayQueryResults(data, type) {
+            const resultsSection = document.getElementById('query-results');
+            const outputDiv = document.getElementById('query-output');
+            
+            if (data.length === 0) {
+                outputDiv.innerHTML = '<p class="p-4 text-gray-500">No results found.</p>';
+                resultsSection.style.display = 'block';
+                return;
+            }
+            
+            const headers = Object.keys(data[0]);
+            let tableHTML = '<table><thead><tr>';
+            
+            headers.forEach(header => {
+                tableHTML += `<th>${header.replace(/_/g, ' ').toUpperCase()}</th>`;
+            });
+            
+            tableHTML += '</tr></thead><tbody>';
+            
+            data.forEach(row => {
+                tableHTML += '<tr>';
+                headers.forEach(header => {
+                    let value = row[header];
+                    if (typeof value === 'number' && value > 1000) {
+                        value = value.toLocaleString();
+                    }
+                    tableHTML += `<td>${value}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+            
+            tableHTML += '</tbody></table>';
+            outputDiv.innerHTML = tableHTML;
+            resultsSection.style.display = 'block';
+            
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Modal Functions
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function showQueryBuilder() {
+            showModal('queryBuilderModal');
+            updateColumns(); // Initialize with default table
+        }
+
+        function showHelp() {
+            showModal('helpModal');
+        }
+
+        function generateERD() {
+            showModal('erdModal');
+            showNotification('Entity Relationship Diagram loaded');
+        }
+
+        function showQuickActions() {
+            const actions = [
+                { text: '🔧 Query Builder', action: () => showQueryBuilder() },
+                { text: '📊 View ERD', action: () => generateERD() },
+                { text: '📥 Download SQL', action: () => downloadSQL() },
+                { text: '❓ Help', action: () => showHelp() }
+            ];
+            
+            // Create quick action menu
+            const menu = document.createElement('div');
+            menu.className = 'fixed bottom-24 right-8 bg-white rounded-lg shadow-xl border p-4 z-50';
+            menu.style.minWidth = '200px';
+            
+            actions.forEach(action => {
+                const button = document.createElement('button');
+                button.className = 'block w-full text-left px-4 py-2 hover:bg-gray-100 rounded transition-colors';
+                button.textContent = action.text;
+                button.onclick = () => {
+                    action.action();
+                    document.body.removeChild(menu);
+                };
+                menu.appendChild(button);
+            });
+            
+            // Close button
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded transition-colors border-t mt-2 pt-2';
+            closeBtn.textContent = '✕ Close';
+            closeBtn.onclick = () => document.body.removeChild(menu);
+            menu.appendChild(closeBtn);
+            
+            document.body.appendChild(menu);
+            
+            // Auto-close after 10 seconds
+            setTimeout(() => {
+                if (document.body.contains(menu)) {
+                    document.body.removeChild(menu);
+                }
+            }, 10000);
+        }
+
+        // Query Builder Functions
+        function updateColumns() {
+            const tableSelect = document.getElementById('tableSelect');
+            const columnCheckboxes = document.getElementById('columnCheckboxes');
+            const selectedTable = tableSelect.value;
+            
+            columnCheckboxes.innerHTML = '';
+            
+            if (tableColumns[selectedTable]) {
+                tableColumns[selectedTable].forEach(column => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center space-x-2';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `col_${column}`;
+                    checkbox.value = column;
+                    checkbox.onchange = generateQuery;
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `col_${column}`;
+                    label.textContent = column;
+                    label.className = 'text-sm cursor-pointer';
+                    
+                    div.appendChild(checkbox);
+                    div.appendChild(label);
+                    columnCheckboxes.appendChild(div);
+                });
+            }
+            
+            generateQuery();
+        }
+
+        function generateQuery() {
+            const tableSelect = document.getElementById('tableSelect');
+            const whereCondition = document.getElementById('whereCondition');
+            const orderBy = document.getElementById('orderBy');
+            const limitValue = document.getElementById('limitValue');
+            const generatedQuery = document.getElementById('generatedQuery');
+            
+            const selectedTable = tableSelect.value;
+            const selectedColumns = Array.from(document.querySelectorAll('#columnCheckboxes input:checked'))
+                .map(cb => cb.value);
+            
+            let query = 'SELECT ';
+            
+            if (selectedColumns.length === 0) {
+                query += '*';
+            } else {
+                query += selectedColumns.join(', ');
+            }
+            
+            query += `\nFROM ${selectedTable}`;
+            
+            if (whereCondition.value.trim()) {
+                query += `\nWHERE ${whereCondition.value.trim()}`;
+            }
+            
+            if (orderBy.value.trim()) {
+                query += `\nORDER BY ${orderBy.value.trim()}`;
+            }
+            
+            if (limitValue.value.trim()) {
+                query += `\nLIMIT ${limitValue.value.trim()}`;
+            }
+            
+            query += ';';
+            
+            generatedQuery.textContent = query;
+        }
+
+        function executeBuiltQuery() {
+            const generatedQuery = document.getElementById('generatedQuery');
+            const query = generatedQuery.textContent;
+            
+            if (query.trim()) {
+                // Simulate query execution with sample data
+                const tableSelect = document.getElementById('tableSelect');
+                const selectedTable = tableSelect.value;
+                
+                // Use sample data based on table
+                let resultData = [];
+                if (selectedTable === 'content') {
+                    resultData = sampleData.popular;
+                } else if (selectedTable === 'users') {
+                    resultData = sampleData.users;
+                } else {
+                    resultData = [{ message: 'Sample data not available for this table', query: query }];
+                }
+                
+                displayQueryResults(resultData, 'custom');
+                closeModal('queryBuilderModal');
+                showNotification('Custom query executed successfully!');
+            } else {
+                showNotification('Please generate a query first', 'error');
+            }
+        }
+
+        function copyBuiltQuery() {
+            const generatedQuery = document.getElementById('generatedQuery');
+            const query = generatedQuery.textContent;
+            
+            if (query.trim()) {
+                navigator.clipboard.writeText(query).then(() => {
+                    showNotification('Generated query copied to clipboard!');
+                }).catch(() => {
+                    showNotification('Failed to copy query', 'error');
+                });
+            } else {
+                showNotification('No query to copy', 'error');
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to code blocks
+            const codeBlocks = document.querySelectorAll('pre code');
+            codeBlocks.forEach(block => {
+                block.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.01)';
+                    this.style.transition = 'transform 0.2s ease';
+                });
+                
+                block.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+
+            // Close modals when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    e.target.classList.remove('show');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+
+            // Add query builder event listeners
+            ['whereCondition', 'orderBy', 'limitValue'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', generateQuery);
+                }
+            });
+
+            // Initialize counters with animation
+            setTimeout(() => {
+                animateCounters();
+            }, 1000);
+        });
+
+        function animateCounters() {
+            const counters = [
+                { id: 'user-count', target: 5 },
+                { id: 'content-count', target: 5 },
+                { id: 'subscription-count', target: 5 }
+            ];
+
+            counters.forEach(counter => {
+                const element = document.getElementById(counter.id);
+                if (element) {
+                    let current = 0;
+                    const increment = counter.target / 20;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= counter.target) {
+                            current = counter.target;
+                            clearInterval(timer);
+                        }
+                        element.textContent = Math.floor(current);
+                    }, 50);
+                }
+            });
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'k':
+                        e.preventDefault();
+                        showQueryBuilder();
+                        break;
+                    case 'h':
+                        e.preventDefault();
+                        showHelp();
+                        break;
+                    case 'd':
+                        e.preventDefault();
+                        downloadSQL();
+                        break;
+                }
+            }
+            
+            if (e.key === 'Escape') {
+                // Close any open modals
+                document.querySelectorAll('.modal.show').forEach(modal => {
+                    modal.classList.remove('show');
+                });
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9685bc6ea51f47e7',t:'MTc1NDA1NTUwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
